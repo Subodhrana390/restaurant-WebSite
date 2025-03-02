@@ -175,7 +175,7 @@ const Header = () => {
                 key={item}
                 className="text-gray-700 hover:text-orange-500 transition"
               >
-                <a href={`#${item.toLowerCase()}`} onClick={toggleMenu}>
+                <a href={`${item.toLowerCase()}`} onClick={toggleMenu}>
                   {item}
                 </a>
               </li>
