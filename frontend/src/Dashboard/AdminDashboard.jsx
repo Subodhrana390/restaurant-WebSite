@@ -14,7 +14,7 @@ import AddTable from "./components/table/component/AddTable";
 import UpdateTable from "./components/table/component/updateTable";
 import Profile from "./components/Profile/Profile";
 import ReservationList from "./components/reservation/ReservationList";
-import ViewReservation from "./components/reservation/component/viewReservation";
+import ViewReservation from "./components/reservation/component/ViewReservation";
 import CustomerList from "./components/Customer/CustomerList";
 import ViewCustomer from "./components/Customer/viewCustomer";
 
