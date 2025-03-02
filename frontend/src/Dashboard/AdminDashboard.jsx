@@ -16,7 +16,7 @@ import Profile from "./components/Profile/Profile";
 import ReservationList from "./components/reservation/ReservationList";
 import ViewReservation from "./components/reservation/component/ViewReservation";
 import CustomerList from "./components/Customer/CustomerList";
-import ViewCustomer from "./components/Customer/ViewCustomeriewCustomer";
+import ViewCustomer from "./components/Customer/ViewCustomer";
 
 const AdminDashboard = () => {
   return (
