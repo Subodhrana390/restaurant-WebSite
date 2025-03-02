@@ -242,12 +242,7 @@ const Cart = () => {
                 }
               );
 
-              if (verifyRes.data.success) {
-                await updatePaymentStatus(
-                  savedOrder._id,
-                  "success",
-                  response.razorpay_payment_id
-                );
+              if (verifyRes.data.success){
                 navigate(`/order-status/${savedOrder._id}`);
               } else {
                 console.error("Payment verification failed:", verifyRes.data);
