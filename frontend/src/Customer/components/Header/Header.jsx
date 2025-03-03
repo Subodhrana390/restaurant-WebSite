@@ -64,7 +64,7 @@ const Header = () => {
               key={item}
               className="text-gray-700 hover:text-orange-500 transition"
             >
-              <a href={`/${item === "Home" ? " " : item.toLowerCase()}`}>
+              <a href={`/${item === "Home" ? "/" : item.toLowerCase()}`}>
                 {item}
               </a>
             </li>
