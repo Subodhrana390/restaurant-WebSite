@@ -5,7 +5,6 @@ import DashboardHome from "./components/DashboardHome";
 import EmployeeList from "./components/Employee/EmployeeList";
 import AddEmployee from "./components/Employee/component/AddEmployee";
 import UpdateEmployee from "./components/Employee/component/UpdateEmployee";
-import ViewEmployee from "./components/Employee/component/ViewEmployee";
 import MenuList from "./components/menu/MenuList";
 import AddDish from "./components/menu/component/AddDish";
 import UpdateDish from "./components/menu/component/UpdateDish";
@@ -20,6 +19,7 @@ import ViewCustomer from "./components/Customer/ViewCustomer";
 import OrdersList from "./components/order/OrdersList";
 import Login from "./components/Auth/Login";
 import AdminProtectedRoutes from "./AdminProtectedRoutes";
+import ViewEmployee from "./components/Employee/component/ViewEmployee";
 
 const AdminDashboard = () => {
   return (
