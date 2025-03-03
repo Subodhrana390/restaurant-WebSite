@@ -8,6 +8,7 @@ import reservationRouter from "./modules/reservation/reservation.routes.js";
 import menuRouter from "./modules/menu/menu.routes.js";
 import orderRouter from "./modules/order/order.routes.js";
 import cartRouter from "./modules/cart/cart.routes.js";
+import { getDashboardData } from "./modules/dashboard/dashboard.controller.js";
 
 export function bootstrap(app) {
   app.use("/api/v1/auth", authRouter);
@@ -18,6 +19,7 @@ export function bootstrap(app) {
   app.use("/api/v1/menu", menuRouter);
   app.use("/api/v1/orders", orderRouter);
   app.use("/api/v1/cart",cartRouter);
+  app.use("/api/v1/dashboard",getDashboardData);
 
   app.all("*", (req, res, next) => {
     next(new AppError(404,"Endpoint was not found"));
