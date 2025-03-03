@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 
@@ -9,16 +9,23 @@ const ViewCustomer = () => {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchUser = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/user/${id}`
+          `${import.meta.env.VITE_APP_BASE_URL}/user/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setUser(response.data.data);
       } catch (error) {
-        toast.error("Failed to fetch user details");
       } finally {
         setLoading(false);
       }

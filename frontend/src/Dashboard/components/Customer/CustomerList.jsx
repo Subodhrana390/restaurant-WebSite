@@ -1,6 +1,13 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import { FaPlus, FaEdit, FaTrash, FaEye, FaSearch, FaFilter } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaEye,
+  FaSearch,
+  FaFilter,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const CustomerList = () => {
@@ -11,14 +18,23 @@ const CustomerList = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const accessToken = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_APP_BASE_URL}/user`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_APP_BASE_URL}/user`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
         setUsers(response.data.data.users);
       } catch (error) {
-        console.error("Error fetching users:", error);
+     
       } finally {
         setLoading(false);
       }
@@ -32,7 +48,9 @@ const CustomerList = () => {
   };
 
   const handleDelete = async () => {
-    await axios.delete(`${import.meta.env.VITE_APP_BASE_URL}/users/${userToDelete._id}`);
+    await axios.delete(
+      `${import.meta.env.VITE_APP_BASE_URL}/users/${userToDelete._id}`
+    );
     setUsers(users.filter((u) => u._id !== userToDelete._id));
     setShowDeleteModal(false);
     setUserToDelete(null);
@@ -44,7 +62,9 @@ const CustomerList = () => {
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.phone.includes(searchTerm);
     const matchesRole = filterRole ? user.role === filterRole : true;
-    const matchesStatus = filterStatus ? user.isActive.toString() === filterStatus : true;
+    const matchesStatus = filterStatus
+      ? user.isActive.toString() === filterStatus
+      : true;
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -111,23 +131,39 @@ const CustomerList = () => {
           </thead>
           <tbody>
             {filteredUsers.map((user) => (
-              <tr key={user._id} className="border-t border-white/10 hover:bg-white/5">
+              <tr
+                key={user._id}
+                className="border-t border-white/10 hover:bg-white/5"
+              >
                 <td className="p-3">{user.name}</td>
                 <td className="p-3 capitalize">{user.role}</td>
                 <td className="p-3">
-                  <span className={user.isActive ? "text-green-400" : "text-red-400"}>
+                  <span
+                    className={
+                      user.isActive ? "text-green-400" : "text-red-400"
+                    }
+                  >
                     {user.isActive ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
-                    <Link to={`/admin/customers/view/${user._id}`} className="p-2 bg-blue-600/50 rounded hover:bg-blue-700/60">
+                    <Link
+                      to={`/admin/customers/view/${user._id}`}
+                      className="p-2 bg-blue-600/50 rounded hover:bg-blue-700/60"
+                    >
                       <FaEye />
                     </Link>
-                    <Link to={`/admin/customers/edit/${user._id}`} className="p-2 bg-yellow-600/50 rounded hover:bg-yellow-700/60">
+                    <Link
+                      to={`/admin/customers/edit/${user._id}`}
+                      className="p-2 bg-yellow-600/50 rounded hover:bg-yellow-700/60"
+                    >
                       <FaEdit />
                     </Link>
-                    <button onClick={() => confirmDelete(user)} className="p-2 bg-red-600/50 rounded hover:bg-red-700/60">
+                    <button
+                      onClick={() => confirmDelete(user)}
+                      className="p-2 bg-red-600/50 rounded hover:bg-red-700/60"
+                    >
                       <FaTrash />
                     </button>
                   </div>
@@ -143,13 +179,20 @@ const CustomerList = () => {
           <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full border border-white/20">
             <h3 className="text-xl font-bold mb-4">Confirm Delete</h3>
             <p>
-              Are you sure you want to delete user <span className="font-bold">{userToDelete?.name}</span>?
+              Are you sure you want to delete user{" "}
+              <span className="font-bold">{userToDelete?.name}</span>?
             </p>
             <div className="flex justify-end gap-4 mt-6">
-              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+              >
                 Cancel
               </button>
-              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 rounded hover:bg-red-700">
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+              >
                 Delete
               </button>
             </div>

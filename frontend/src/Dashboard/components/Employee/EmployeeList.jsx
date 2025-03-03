@@ -10,46 +10,6 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-// Sample data - replace with API calls in a real application
-const SAMPLE_EMPLOYEES = [
-  {
-    _id: "1",
-    name: "John Doe",
-    email: "john@restaurant.com",
-    phone: "(555) 123-4567",
-    role: "manager",
-    salary: 4500,
-    shift: "morning",
-    status: "active",
-    dateOfJoining: new Date(2022, 3, 15),
-    profileImage: null,
-  },
-  {
-    _id: "2",
-    name: "Jane Smith",
-    email: "jane@restaurant.com",
-    phone: "(555) 987-6543",
-    role: "chef",
-    salary: 3800,
-    shift: "evening",
-    status: "active",
-    dateOfJoining: new Date(2022, 6, 20),
-    profileImage: null,
-  },
-  {
-    _id: "3",
-    name: "Robert Johnson",
-    email: "robert@restaurant.com",
-    phone: "(555) 456-7890",
-    role: "waiter",
-    salary: 2500,
-    shift: "night",
-    status: "inactive",
-    dateOfJoining: new Date(2023, 1, 10),
-    profileImage: null,
-  },
-];
-
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,16 +18,22 @@ const EmployeeList = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const accessToken = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchEmployees() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/employee`
+          `${import.meta.env.VITE_APP_BASE_URL}/employee`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setEmployees(response.data.data.employees);
       } catch (error) {
-        console.error("Error fetching employees:", error);
       } finally {
         setLoading(false);
       }
@@ -84,7 +50,13 @@ const EmployeeList = () => {
   // Handle actual delete
   const handleDelete = async () => {
     await axios.delete(
-      `${import.meta.env.VITE_APP_BASE_URL}/employee/${employeeToDelete._id}`
+      `${import.meta.env.VITE_APP_BASE_URL}/employee/${employeeToDelete._id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
     );
 
     // Update local state

@@ -26,9 +26,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(false);
-
-  // API base URL - centralized for consistency
-  const API_BASE_URL = "http://localhost:5000/api/v1/employee";
+  const accessToken = localStorage.getItem("token");
 
   // Fetch profile data
   useEffect(() => {
@@ -36,7 +34,12 @@ const Profile = () => {
     setError(null);
 
     axios
-      .get(`${API_BASE_URL}/profile`)
+      .get(`${import.meta.env.VITE_APP_BASE_URL}/employee/profile`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
       .then((res) => {
         setProfile(res.data.data);
         setUpdatedProfile(res.data.data);
@@ -47,7 +50,7 @@ const Profile = () => {
         setError("Failed to load profile data. Please try again later.");
         setLoading(false);
       });
-  }, []);
+  }, [accessToken]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -84,53 +87,60 @@ const Profile = () => {
     }
   };
 
-  // Handle profile update
-  const handleUpdate = async () => {
-    setLoading(true);
-    setError(null);
-    setUpdateSuccess(false);
 
-    const formData = new FormData();
-    formData.append("phone", updatedProfile.phone);
-    formData.append("street", updatedProfile.address.street);
-    formData.append("city", updatedProfile.address.city);
-    formData.append("state", updatedProfile.address.state);
-    formData.append("pinCode", updatedProfile.address.pinCode);
-    formData.append("country", updatedProfile.address.country);
+  // const handleUpdate = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   setUpdateSuccess(false);
 
-    if (profileImage) {
-      formData.append("profileImage", profileImage);
-    }
+  //   const formData = new FormData();
+  //   formData.append("phone", updatedProfile.phone);
+  //   formData.append("street", updatedProfile.address.street);
+  //   formData.append("city", updatedProfile.address.city);
+  //   formData.append("state", updatedProfile.address.state);
+  //   formData.append("pinCode", updatedProfile.address.pinCode);
+  //   formData.append("country", updatedProfile.address.country);
 
-    try {
-      const res = await axios.put(`${API_BASE_URL}/update-profile`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setProfile(res.data.data || res.data);
-      setUpdatedProfile(res.data.data || res.data);
-      setEditing(false);
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
-    } catch (err) {
-      console.error("Error updating profile:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to update profile. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   if (profileImage) {
+  //     formData.append("profileImage", profileImage);
+  //   }
+
+  //   try {
+  //     const res = await axios.put(
+  //       `${import.meta.env.VITE_API_BASE_URL}/update-profile`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+  //     setProfile(res.data.data || res.data);
+  //     setUpdatedProfile(res.data.data || res.data);
+  //     setEditing(false);
+  //     setUpdateSuccess(true);
+  //     setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
+  //   } catch (err) {
+  //     console.error("Error updating profile:", err);
+  //     setError(
+  //       err.response?.data?.message ||
+  //         "Failed to update profile. Please try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Cancel editing - reset form
-  const handleCancel = () => {
-    setUpdatedProfile(profile);
-    setProfileImage(null);
-    setEditing(false);
-    setError(null);
-  };
+  // const handleCancel = () => {
+  //   setUpdatedProfile(profile);
+  //   setProfileImage(null);
+  //   setEditing(false);
+  //   setError(null);
+  // };
 
-  if (loading && !profile.name) {
+  if (loading) {
     return (
       <div className="max-w-3xl mx-auto p-6 bg-gray-800 text-white rounded-lg text-center">
         <div className="animate-pulse">
@@ -149,15 +159,11 @@ const Profile = () => {
     <div className="max-w-3xl mx-auto p-6 bg-transparent text-white rounded-lg">
       <h2 className="text-2xl font-semibold mb-4">Profile</h2>
 
-      {error && (
-        <div className="bg-red-800 text-white p-3 rounded mb-4">{error}</div>
-      )}
-
-      {updateSuccess && (
+      {/* {updateSuccess && (
         <div className="bg-green-700 text-white p-3 rounded mb-4">
           Profile updated successfully!
         </div>
-      )}
+      )} */}
 
       <div className="flex items-center gap-4">
         <img
@@ -315,7 +321,7 @@ const Profile = () => {
           </p>
         )}
       </div>
-
+{/* 
       <div className="mt-6 flex gap-3">
         {editing ? (
           <>
@@ -372,7 +378,7 @@ const Profile = () => {
             Edit Profile
           </button>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

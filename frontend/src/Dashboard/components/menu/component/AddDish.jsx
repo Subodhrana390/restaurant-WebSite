@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlus, FaUtensils, FaTag, FaPercent, FaLeaf, FaFire, FaPizzaSlice, FaImage } from "react-icons/fa";
+import {
+  FaPlus,
+  FaUtensils,
+  FaTag,
+  FaPercent,
+  FaLeaf,
+  FaFire,
+  FaPizzaSlice,
+  FaImage,
+} from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -19,11 +28,9 @@ const AddDish = () => {
     addons: "",
     image: null,
   });
-  
-  // Preview image state
+  const accessToken = localStorage.getItem("token");
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Generic change handler for text, select, and checkbox fields
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -32,7 +39,6 @@ const AddDish = () => {
     }));
   };
 
-  // Handle file input change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -40,8 +46,7 @@ const AddDish = () => {
         ...prev,
         image: file,
       }));
-      
-      // Create preview URL
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -50,7 +55,6 @@ const AddDish = () => {
     }
   };
 
-  // Convert addons string (format: "Addon1:price, Addon2:price") into an array of objects
   const parseAddons = (addonsString) => {
     if (!addonsString) return [];
     return addonsString.split(",").map((addon) => {
@@ -59,10 +63,8 @@ const AddDish = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Use FormData to handle file upload and other fields
     const data = new FormData();
     data.append("name", formData.name);
     data.append("description", formData.description);
@@ -79,19 +81,17 @@ const AddDish = () => {
     }
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_APP_BASE_URL}/menu`,
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      
+      await axios.post(`${import.meta.env.VITE_APP_BASE_URL}/menu`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
       toast.success("Dish added successfully!");
       navigate("/admin/menu");
     } catch (error) {
-      console.error("Error adding dish:", error);
-      toast.error("Failed to add dish. Please try again.");
+      toast.error("Access denied. Admins only.");
     }
   };
 
@@ -101,7 +101,7 @@ const AddDish = () => {
         <h1 className="text-2xl font-bold mb-6 flex items-center gap-2 text-blue-800">
           <FaPlus className="text-blue-600" /> Add New Dish
         </h1>
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Dish Name */}
           <div className="relative">
@@ -122,7 +122,7 @@ const AddDish = () => {
               required
             />
           </div>
-          
+
           {/* Description */}
           <div>
             <label
@@ -141,7 +141,7 @@ const AddDish = () => {
               className="w-full p-3 bg-white bg-opacity-60 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-800 placeholder-blue-400"
             />
           </div>
-          
+
           {/* Category */}
           <div>
             <label
@@ -166,7 +166,7 @@ const AddDish = () => {
               <option value="side dish">Side Dish</option>
             </select>
           </div>
-          
+
           {/* Price & Discount - Two columns */}
           <div className="grid grid-cols-2 gap-4">
             {/* Price */}
@@ -193,7 +193,7 @@ const AddDish = () => {
                 />
               </div>
             </div>
-            
+
             {/* Discount */}
             <div>
               <label
@@ -218,14 +218,15 @@ const AddDish = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Ingredients */}
           <div>
             <label
               htmlFor="ingredients"
               className="block text-sm font-medium text-blue-700 mb-1"
             >
-              <FaPizzaSlice className="inline mr-2 text-blue-600" /> Ingredients (comma separated):
+              <FaPizzaSlice className="inline mr-2 text-blue-600" /> Ingredients
+              (comma separated):
             </label>
             <input
               type="text"
@@ -237,7 +238,7 @@ const AddDish = () => {
               className="w-full p-3 bg-white bg-opacity-60 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-blue-800 placeholder-blue-400"
             />
           </div>
-          
+
           {/* Checkboxes - Two columns */}
           <div className="grid grid-cols-2 gap-4">
             {/* Availability */}
@@ -250,11 +251,14 @@ const AddDish = () => {
                 onChange={handleChange}
                 className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
               />
-              <label htmlFor="isAvailable" className="ml-2 text-sm text-blue-700">
+              <label
+                htmlFor="isAvailable"
+                className="ml-2 text-sm text-blue-700"
+              >
                 Available
               </label>
             </div>
-            
+
             {/* Vegetarian */}
             <div className="flex items-center p-3 bg-white bg-opacity-40 rounded-lg border border-blue-200">
               <input
@@ -270,7 +274,7 @@ const AddDish = () => {
               </label>
             </div>
           </div>
-          
+
           {/* Spice Level */}
           <div>
             <label
@@ -280,62 +284,86 @@ const AddDish = () => {
               <FaFire className="inline mr-2 text-orange-500" /> Spice Level:
             </label>
             <div className="flex gap-4">
-              <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
-                formData.spiceLevel === 'low' 
-                  ? 'bg-green-100 border-green-300' 
-                  : 'bg-white bg-opacity-40 border-blue-200'
-              } cursor-pointer transition-colors`}>
+              <label
+                className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
+                  formData.spiceLevel === "low"
+                    ? "bg-green-100 border-green-300"
+                    : "bg-white bg-opacity-40 border-blue-200"
+                } cursor-pointer transition-colors`}
+              >
                 <input
                   type="radio"
                   name="spiceLevel"
                   value="low"
-                  checked={formData.spiceLevel === 'low'}
+                  checked={formData.spiceLevel === "low"}
                   onChange={handleChange}
                   className="sr-only"
                 />
-                <span className={formData.spiceLevel === 'low' ? 'text-green-700' : 'text-blue-700'}>
+                <span
+                  className={
+                    formData.spiceLevel === "low"
+                      ? "text-green-700"
+                      : "text-blue-700"
+                  }
+                >
                   Low
                 </span>
               </label>
-              
-              <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
-                formData.spiceLevel === 'medium' 
-                  ? 'bg-yellow-100 border-yellow-300' 
-                  : 'bg-white bg-opacity-40 border-blue-200'
-              } cursor-pointer transition-colors`}>
+
+              <label
+                className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
+                  formData.spiceLevel === "medium"
+                    ? "bg-yellow-100 border-yellow-300"
+                    : "bg-white bg-opacity-40 border-blue-200"
+                } cursor-pointer transition-colors`}
+              >
                 <input
                   type="radio"
                   name="spiceLevel"
                   value="medium"
-                  checked={formData.spiceLevel === 'medium'}
+                  checked={formData.spiceLevel === "medium"}
                   onChange={handleChange}
                   className="sr-only"
                 />
-                <span className={formData.spiceLevel === 'medium' ? 'text-yellow-700' : 'text-blue-700'}>
+                <span
+                  className={
+                    formData.spiceLevel === "medium"
+                      ? "text-yellow-700"
+                      : "text-blue-700"
+                  }
+                >
                   Medium
                 </span>
               </label>
-              
-              <label className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
-                formData.spiceLevel === 'high' 
-                  ? 'bg-red-100 border-red-300' 
-                  : 'bg-white bg-opacity-40 border-blue-200'
-              } cursor-pointer transition-colors`}>
+
+              <label
+                className={`flex-1 flex items-center justify-center p-3 rounded-lg border ${
+                  formData.spiceLevel === "high"
+                    ? "bg-red-100 border-red-300"
+                    : "bg-white bg-opacity-40 border-blue-200"
+                } cursor-pointer transition-colors`}
+              >
                 <input
                   type="radio"
                   name="spiceLevel"
                   value="high"
-                  checked={formData.spiceLevel === 'high'}
+                  checked={formData.spiceLevel === "high"}
                   onChange={handleChange}
                   className="sr-only"
                 />
-                <span className={formData.spiceLevel === 'high' ? 'text-red-700' : 'text-blue-700'}>
+                <span
+                  className={
+                    formData.spiceLevel === "high"
+                      ? "text-red-700"
+                      : "text-blue-700"
+                  }
+                >
                   High
                 </span>
               </label>
             </div>
           </div>
-          
+
           {/* Addons */}
           <div>
             <label
@@ -356,14 +384,17 @@ const AddDish = () => {
             {formData.addons && (
               <div className="mt-2 text-xs text-blue-600">
                 {parseAddons(formData.addons).map((addon, idx) => (
-                  <span key={idx} className="inline-block mr-2 mb-1 px-2 py-1 bg-blue-100 rounded-full">
+                  <span
+                    key={idx}
+                    className="inline-block mr-2 mb-1 px-2 py-1 bg-blue-100 rounded-full"
+                  >
                     {addon.name}: ${addon.price.toFixed(2)}
                   </span>
                 ))}
               </div>
             )}
           </div>
-          
+
           {/* Dish Image */}
           <div>
             <label
@@ -374,34 +405,39 @@ const AddDish = () => {
             </label>
             <div className="mt-1 flex items-center">
               <label className="w-full flex flex-col items-center px-4 py-6 bg-white bg-opacity-60 text-blue-700 rounded-lg border border-blue-300 border-dashed cursor-pointer hover:bg-blue-50">
-                <svg className="w-8 h-8" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg
+                  className="w-8 h-8"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M16.88 9.1A4 4 0 0 1 16 17H5a5 5 0 0 1-1-9.9V7a3 3 0 0 1 4.52-2.59A4.98 4.98 0 0 1 17 8c0 .38-.04.74-.12 1.1zM11 11h3l-4-4-4 4h3v3h2v-3z" />
                 </svg>
                 <span className="mt-2 text-sm">Select an image</span>
-                <input 
-                  type="file" 
-                  id="image" 
+                <input
+                  type="file"
+                  id="image"
                   name="image"
-                  className="hidden" 
+                  className="hidden"
                   accept="image/*"
                   onChange={handleFileChange}
                 />
               </label>
             </div>
-            
+
             {/* Image preview */}
             {imagePreview && (
               <div className="mt-3 relative">
-                <img 
-                  src={imagePreview} 
-                  alt="Preview" 
-                  className="h-32 object-cover rounded-lg border border-blue-300" 
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-32 object-cover rounded-lg border border-blue-300"
                 />
                 <button
                   type="button"
                   onClick={() => {
                     setImagePreview(null);
-                    setFormData(prev => ({ ...prev, image: null }));
+                    setFormData((prev) => ({ ...prev, image: null }));
                   }}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                 >
@@ -410,7 +446,7 @@ const AddDish = () => {
               </div>
             )}
           </div>
-          
+
           {/* Submit */}
           <div className="pt-4">
             <button
@@ -421,7 +457,7 @@ const AddDish = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/admin/menu')}
+              onClick={() => navigate("/admin/menu")}
               className="w-full mt-3 py-3 bg-transparent border border-blue-500 hover:bg-blue-50 rounded-lg font-medium text-blue-600 transition duration-200"
             >
               Cancel

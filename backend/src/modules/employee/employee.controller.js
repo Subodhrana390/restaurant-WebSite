@@ -15,7 +15,7 @@ const getEmployeeById = asyncHandler(async (req, res, next) => {
 });
 
 const getEmployeeProfile = asyncHandler(async (req, res, next) => {
-  const employee = await EmployeeModel.findById("67be20ba8b84bee476d0aae1").select("-password");
+  const employee = await EmployeeModel.findById(req.user._id).select("-password");
   if (!employee) {
     return next(new AppError(404, "Employee not found"));
   }
@@ -24,7 +24,6 @@ const getEmployeeProfile = asyncHandler(async (req, res, next) => {
     .json(new ApiResponse(200, employee, "Employee fetched successfully"));
 });
 
-// Get All Employees with Cursor Pagination
 const getAllEmployees = asyncHandler(async (req, res, next) => {
   const { cursor, limit = 10 } = req.query;
   const pageSize = parseInt(limit, 10) || 10;

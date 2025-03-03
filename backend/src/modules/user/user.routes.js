@@ -6,36 +6,32 @@ import {
   getAllUsers,
   getUserById,
   updateUserById,
-  getUserProfile
+  getUserProfile,
 } from "./user.controller.js";
 import { allowedTo, protectedRoutes } from "../auth/auth.controller.js";
 
 const userRouter = Router();
 
-userRouter.get(
-  "/",
-  // protectedRoutes, allowedTo("admin"),
-  getAllUsers
-);
-userRouter.get("/profile",protectedRoutes, getUserProfile);
+userRouter.get("/", protectedRoutes, allowedTo("admin"), getAllUsers);
+userRouter.get("/profile", protectedRoutes, getUserProfile);
 userRouter.get("/:id", getUserById);
 userRouter.put(
   "/:id",
   protectedRoutes,
-  allowedTo(["user", "admin"]),
+  allowedTo("customer", "admin"),
   uploadSingleFile("profileImage", "customer"),
   updateUserById
 );
 userRouter.patch(
   "/change-password",
   protectedRoutes,
-  allowedTo(["user"]),
+  allowedTo("customer"),
   changePassword
 );
 userRouter.delete(
   "/:id",
   protectedRoutes,
-  allowedTo(["user", "admin"]),
+  allowedTo("customer", "admin"),
   deleteUser
 );
 

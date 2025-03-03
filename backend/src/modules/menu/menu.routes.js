@@ -12,12 +12,23 @@ import { allowedTo, protectedRoutes } from "../auth/auth.controller.js";
 import { uploadSingleFile } from "../../../multer/multer.js";
 
 const menuRouter = Router();
-// Define routes
-menuRouter.post("/", uploadSingleFile("image", "menu"), createMenuItem);
+menuRouter.post(
+  "/",
+  protectedRoutes,
+  allowedTo("admin"),
+  uploadSingleFile("image", "menu"),
+  createMenuItem
+);
 menuRouter.get("/", getAllMenuItems);
 menuRouter.get("/:id", getMenuItemById);
-menuRouter.put("/:id", uploadSingleFile("image", "menu"), updateMenuItem);
-menuRouter.delete("/:id", deleteMenuItem);
+menuRouter.put(
+  "/:id",
+  protectedRoutes,
+  allowedTo("admin"),
+  uploadSingleFile("image", "menu"),
+  updateMenuItem
+);
+menuRouter.delete("/:id", protectedRoutes, allowedTo("admin"), deleteMenuItem);
 menuRouter.post("/:id/review", addReview);
 menuRouter.get("/category/:category", getMenuByCategory);
 

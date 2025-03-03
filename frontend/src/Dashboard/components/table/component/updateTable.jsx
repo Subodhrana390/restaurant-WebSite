@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaEdit, FaPlus } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 
 const UpdateTable = () => {
@@ -9,19 +9,24 @@ const UpdateTable = () => {
   const [formData, setFormData] = useState({
     tableNumber: 1,
     capacity: 1,
-    isReserved: 0
   });
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchEmployees() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/tables/${id}`
+          `${import.meta.env.VITE_APP_BASE_URL}/tables/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setFormData(response.data.data);
       } catch (error) {
-        console.error("Error fetching employees:", error);
       } finally {
         setLoading(false);
       }
@@ -47,6 +52,7 @@ const UpdateTable = () => {
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -102,27 +108,6 @@ const UpdateTable = () => {
               className="mt-1 w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-          </div>
-
-          {/* Role */}
-          <div>
-            <label
-              htmlFor="isReserved"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Reserverd:
-            </label>
-            <select
-              id="isReserved"
-              name="isReserved"
-              value={formData.isReserved}
-              onChange={handleChange}
-              className="mt-1 w-full p-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value={true}>Yes</option>
-              <option value={false}>No</option>
-            </select>
           </div>
 
           {/* Submit */}

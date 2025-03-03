@@ -9,21 +9,28 @@ import {
 import { allowedTo, protectedRoutes } from "../auth/auth.controller.js";
 
 const tableRouter = Router();
-tableRouter.post("/", 
+tableRouter.post("/", protectedRoutes, allowedTo("admin"), createTable);
+tableRouter.get(
+  "/",
+  protectedRoutes,
+  allowedTo("admin", "manager"),
+  getAllTables
+);
+tableRouter.get(
+  "/:id",
   // protectedRoutes, allowedTo("admin"),
-   createTable);
-tableRouter.get("/", getAllTables);
-tableRouter.get("/:id", 
-  // protectedRoutes, allowedTo("admin"), 
-  getTableByNumber);
+  getTableByNumber
+);
 tableRouter.put(
   "/:tableNumber",
-  // protectedRoutes,
-  // allowedTo("admin"),
+  protectedRoutes,
+  allowedTo("admin"),
   updateTableReservation
 );
-tableRouter.delete("/:id", 
+tableRouter.delete(
+  "/:id",
   // protectedRoutes, allowedTo("admin"),
-   deleteTable);
+  deleteTable
+);
 
 export default tableRouter;

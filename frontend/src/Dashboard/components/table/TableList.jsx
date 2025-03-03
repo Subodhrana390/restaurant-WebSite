@@ -11,6 +11,7 @@ const TableList = () => {
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
+  const accessToken = localStorage.getItem("token");
 
   useEffect(() => {
     fetchTables();
@@ -26,8 +27,12 @@ const TableList = () => {
           params: {
             cursor,
             limit: 10,
-            search: searchTerm || undefined, // Only send if not empty
-            reserved: reservedStatus !== "" ? reservedStatus : undefined, // Only send if selected
+            search: searchTerm || undefined,
+            reserved: reservedStatus !== "" ? reservedStatus : undefined,
+          },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

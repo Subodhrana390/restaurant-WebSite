@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const UpdateDish = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem("token");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -112,11 +114,14 @@ const UpdateDish = () => {
 
     try {
       await axios.put(`${import.meta.env.VITE_APP_BASE_URL}/menu/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       navigate("/admin/menu");
     } catch (error) {
-      console.error("Error updating dish:", error);
+      toast.error("Access denied. Admins only.");
     }
   };
 

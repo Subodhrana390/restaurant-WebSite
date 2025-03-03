@@ -245,7 +245,7 @@ const Cart = () => {
               if (verifyRes.data.success) {
                 await updatePaymentStatus(
                   savedOrder._id,
-                  "success",
+                  "paid",
                   response.razorpay_payment_id
                 );
                 navigate(`/order-status/${savedOrder._id}`);

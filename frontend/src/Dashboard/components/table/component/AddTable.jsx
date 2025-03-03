@@ -7,8 +7,9 @@ const AddTable = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     tableNumber: 1,
-    capacity: 1
+    capacity: 1,
   });
+  const accessToken = localStorage.getItem("token");
 
   // Handle text and select field changes (for main form fields)
   const handleChange = (e) => {
@@ -29,6 +30,7 @@ const AddTable = () => {
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

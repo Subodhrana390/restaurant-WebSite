@@ -17,21 +17,23 @@ reservationRouter.post(
   createReservation
 );
 reservationRouter.get(
+  "/",
+  protectedRoutes,
+  allowedTo("admin", "manager"),
+  getAllReservations
+);
+
+reservationRouter.get(
   "/customer",
   protectedRoutes,
   allowedTo("customer"),
   getAllReservationByCustomer
 );
-reservationRouter.get(
-  "/",
-  protectedRoutes,
-  allowedTo("admin"),
-  getAllReservations
-);
+
 reservationRouter.get(
   "/:id",
   protectedRoutes,
-  allowedTo(["customer", "admin"]),
+  allowedTo("customer", "admin","manager"),
   getReservationById
 );
 reservationRouter.put(

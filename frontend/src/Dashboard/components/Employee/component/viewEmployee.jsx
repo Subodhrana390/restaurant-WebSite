@@ -8,17 +8,22 @@ const ViewEmployee = () => {
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem("token");
 
-  // Fetch employee details by ID
   useEffect(() => {
     async function fetchEmployee() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/employee/${id}`
+          `${import.meta.env.VITE_APP_BASE_URL}/employee/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         setEmployee(response.data.data);
       } catch (error) {
-        console.error("Error fetching employee:", error);
       } finally {
         setLoading(false);
       }
@@ -26,7 +31,6 @@ const ViewEmployee = () => {
     fetchEmployee();
   }, [id]);
 
-  // Simple date formatting helper
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   if (loading) {

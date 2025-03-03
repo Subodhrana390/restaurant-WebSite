@@ -5,6 +5,7 @@ import axios from "axios";
 
 const AddEmployee = () => {
   const navigate = useNavigate();
+  const accessToken = localStorage.getItem("token");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,7 +26,6 @@ const AddEmployee = () => {
     },
   });
 
-  // Handle text and select field changes (for main form fields)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -34,7 +34,6 @@ const AddEmployee = () => {
     }));
   };
 
-  // Handle address field changes
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -46,7 +45,6 @@ const AddEmployee = () => {
     }));
   };
 
-  // Handle file input changes
   const handleFileChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -54,7 +52,6 @@ const AddEmployee = () => {
     }));
   };
 
-  // Simulate an API call on form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -64,6 +61,7 @@ const AddEmployee = () => {
         {
           headers: {
             "Content-Type": "'multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );

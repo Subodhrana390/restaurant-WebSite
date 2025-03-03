@@ -71,50 +71,37 @@ const createReservation = asyncHandler(async (req, res) => {
 });
 
 const getAllReservations = asyncHandler(async (req, res, next) => {
-  const { cursor, limit = 5, sort = "asc" } = req.query;
-  const pageSize = parseInt(limit, 10) || 5;
-  const sortOrder = sort === "desc" ? -1 : 1; // Allow ascending/descending order
+  const { cursor, sort = "asc" } = req.query;
+  const sortOrder = sort === "desc" ? -1 : 1;
 
-  // Validate cursor as a valid ObjectId
-  if (cursor && !mongoose.Types.ObjectId.isValid(cursor)) {
-    return next(new AppError(400, "Invalid cursor format"));
-  }
-
-  // Build the query
   let query = {};
   if (cursor) {
     query._id = sortOrder === 1 ? { $gt: cursor } : { $lt: cursor };
   }
 
-  // Fetch reservations
-  const reservations = await ReservationModel.find(query)
+  let reservations = await ReservationModel.find(query)
     .sort({ _id: sortOrder })
-    .limit(pageSize)
     .populate("customer table")
     .select("customer table date persons status");
 
-  const nextCursor =
-    reservations.length === pageSize
-      ? reservations[reservations.length - 1]._id
-      : null;
-  s;
-  res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { reservations, nextCursor },
-        "Reservations fetched successfully"
-      )
-    );
+  const hasMore = reservations.length > 0;
+  const nextCursor = hasMore ? reservations[reservations.length - 1]._id : null;
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      { reservations, nextCursor, hasMore },
+      "Reservations fetched successfully"
+    )
+  );
 });
+
 
 const getAllReservationByCustomer = asyncHandler(async (req, res, next) => {
   const { cursor, limit = 5, sort = "asc" } = req.query;
   const pageSize = parseInt(limit, 10) || 5;
   const sortOrder = sort === "desc" ? -1 : 1; // Allow ascending/descending order
   const customerId = req.user._id; // Get the logged-in customer's ID
-  console.log(customerId)
 
   // Validate cursor as a valid ObjectId
   if (cursor && !mongoose.Types.ObjectId.isValid(cursor)) {
@@ -155,7 +142,7 @@ const getAllReservationByCustomer = asyncHandler(async (req, res, next) => {
 const getReservationById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const reservation = await ReservationModel.findById(id).populate("table");
+  const reservation = await ReservationModel.findById(id).populate("table customer");
 
   if (!reservation) {
     throw new AppError(404, "Reservation not found");

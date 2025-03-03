@@ -1,18 +1,19 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaPlus, FaTrash, FaEye, FaSearch } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ReservationList = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [cursor, setCursor] = useState(null); // Cursor for pagination
-  const [hasMore, setHasMore] = useState(true); // Check if more data is available
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const lastReservationRef = useRef(null);
+  const accessToken = localStorage.getItem("token");
 
-  // Fetch reservations
   const fetchReservations = async (reset = false) => {
     if (reset) {
       setReservations([]);
@@ -22,65 +23,89 @@ const ReservationList = () => {
 
     if (!hasMore) return;
 
+    if (reset) {
+      setLoading(true);
+    } else {
+      setIsFetchingMore(true);
+    }
+
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_APP_BASE_URL}/reservations`,
         {
-          params: { limit: 10, cursor },
+          params: { cursor }, // Pass the cursor for pagination
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
+      if (
+        !response.data ||
+        !response.data.data ||
+        !response.data.data.reservations
+      ) {
+        throw new Error("Invalid response data");
+      }
+
       const newReservations = response.data.data.reservations;
+
+      // Update the reservations state
       setReservations((prev) =>
         reset ? newReservations : [...prev, ...newReservations]
       );
 
-      // Update cursor for next batch
-      if (newReservations.length > 0) {
-        setCursor(newReservations[newReservations.length - 1]._id);
+      // Update the cursor and hasMore state
+      if (response.data.data.nextCursor) {
+        setCursor(response.data.data.nextCursor);
       } else {
-        setHasMore(false);
+        setHasMore(false); // No more reservations to fetch
       }
     } catch (error) {
-      console.error("Error fetching reservations:", error);
     } finally {
+      // Reset loading states
       setLoading(false);
       setIsFetchingMore(false);
     }
   };
 
-  // Initial Fetch
   useEffect(() => {
     fetchReservations(true);
   }, []);
 
-  // Filter reservations based on search & status
+  useEffect(() => {
+    if (!lastReservationRef.current || !hasMore) return;
+
+    const observerInstance = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingMore) {
+          setIsFetchingMore(true);
+          fetchReservations();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    observerInstance.observe(lastReservationRef.current);
+    return () => observerInstance.disconnect();
+  }, [reservations, hasMore, isFetchingMore]);
+
   const filteredReservations = reservations.filter((reservation) => {
     const matchesSearch =
       reservation.table.tableNumber.toString().includes(searchTerm) ||
       reservation.persons.toString().includes(searchTerm);
 
-    const matchesStatus = filterStatus
-      ? reservation.status === filterStatus
-      : true;
-    return matchesSearch && matchesStatus;
+  
+    return matchesSearch 
   });
 
   return (
-    <div className="p-6 backdrop-blur-md bg-white/10 border border-white/20 rounded-lg text-white">
-      {/* Header */}
+    <div className="p-6 backdrop-blur-md rounded-lg text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Reservation Management</h1>
-        <Link
-          to="/admin/reservations/add"
-          className="flex items-center px-4 py-2 bg-green-600/80 hover:bg-green-700/90 rounded transition-colors backdrop-blur-sm"
-        >
-          <FaPlus className="mr-2" />
-          Add New Reservation
-        </Link>
       </div>
 
-      {/* Search & Filters */}
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
         <div className="flex-1 relative">
           <input
@@ -94,7 +119,6 @@ const ReservationList = () => {
         </div>
       </div>
 
-      {/* Reservation List */}
       {loading ? (
         <div className="text-center py-12">Loading reservations...</div>
       ) : filteredReservations.length === 0 ? (
@@ -115,10 +139,15 @@ const ReservationList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredReservations.map((reservation) => (
+              {filteredReservations.map((reservation, index) => (
                 <tr
                   key={reservation._id}
                   className="border-t border-white/10 hover:bg-white/5"
+                  ref={
+                    index === filteredReservations.length - 1
+                      ? lastReservationRef
+                      : null
+                  }
                 >
                   <td className="p-3">{reservation.table.tableNumber}</td>
                   <td className="p-3">{reservation.persons}</td>
@@ -161,22 +190,6 @@ const ReservationList = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {/* Load More Button */}
-      {hasMore && (
-        <div className="text-center mt-6">
-          <button
-            onClick={() => {
-              setIsFetchingMore(true);
-              fetchReservations();
-            }}
-            disabled={isFetchingMore}
-            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded transition"
-          >
-            {isFetchingMore ? "Loading..." : "Load More"}
-          </button>
         </div>
       )}
     </div>

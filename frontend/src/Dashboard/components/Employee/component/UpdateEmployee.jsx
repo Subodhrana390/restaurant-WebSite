@@ -7,6 +7,7 @@ const UpdateEmployee = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem("token");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,7 +30,13 @@ const UpdateEmployee = () => {
     async function fetchEmployee() {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/employee/${id}`
+          `${import.meta.env.VITE_APP_BASE_URL}/employee/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
         const employee = response.data.data;
         setFormData({
@@ -40,7 +47,6 @@ const UpdateEmployee = () => {
           salary: employee.salary,
           shift: employee.shift,
           status: employee.status,
-          // If your backend returns an address, you can set it here:
           address: employee.address || {
             street: "",
             city: "",
@@ -59,7 +65,6 @@ const UpdateEmployee = () => {
     fetchEmployee();
   }, [id]);
 
-  // Handle changes for main form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -98,13 +103,12 @@ const UpdateEmployee = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
       navigate("/admin/employees");
-    } catch (error) {
-      console.error("Error updating employee:", error);
-    }
+    } catch (error) {}
   };
 
   if (loading) {

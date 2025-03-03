@@ -18,27 +18,32 @@ const employeeRouter = Router();
 
 employeeRouter.post(
   "/",
-  // protectedRoutes,
-  // allowedTo("admin"),
+  protectedRoutes,
+  allowedTo("admin"),
   uploadSingleFile("profileImage", "employee"),
   createEmployee
 );
 employeeRouter.post("/login", loginEmployee);
 
-employeeRouter.get("/", getAllEmployees);
-employeeRouter.get("/profile", getEmployeeProfile);
-employeeRouter.get("/:id", getEmployeeById);
+employeeRouter.get("/profile", protectedRoutes, getEmployeeProfile);
+employeeRouter.get("/", protectedRoutes, allowedTo("admin"), getAllEmployees);
+employeeRouter.get(
+  "/:id",
+  protectedRoutes,
+  allowedTo("admin"),
+  getEmployeeById
+);
 employeeRouter.put(
   "/:id",
-  // protectedRoutes,
-  // allowedTo("admin"),
+  protectedRoutes,
+  allowedTo("admin"),
   uploadSingleFile("profileImage", "employee"),
   updateEmployeeById
 );
 employeeRouter.delete(
   "/:id",
-  // protectedRoutes,
-  // allowedTo("admin"),
+  protectedRoutes,
+  allowedTo("admin"),
   deleteEmployee
 );
 

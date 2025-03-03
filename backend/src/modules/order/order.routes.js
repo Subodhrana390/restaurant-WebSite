@@ -23,18 +23,23 @@ router.post(
   createOrder
 );
 router.post("/verify-payment", verifyPayment);
-router.get("/", protectedRoutes, allowedTo("admin"), getAllOrders);
-router.get("/customer",protectedRoutes, allowedTo("customer"), getSpecificOrderByCustomer);
+router.get("/", protectedRoutes, allowedTo("admin", "manager"), getAllOrders);
+router.get(
+  "/customer",
+  protectedRoutes,
+  allowedTo("customer"),
+  getSpecificOrderByCustomer
+);
 router.get(
   "/:id",
   protectedRoutes,
-  allowedTo("customer"),
+  allowedTo("customer", "admin"),
   getSpecificOrderById
 );
 router.put(
   "/:orderId/status",
   protectedRoutes,
-  allowedTo("admin"),
+  allowedTo("admin", "manager"),
   updateOrderStatus
 ); // Update order status
 router.put(
@@ -44,6 +49,11 @@ router.put(
   updatePaymentStatus
 ); // Update order status
 router.put("/:orderId/cancel", protectedRoutes, cancelOrder);
-router.delete("/:orderId", protectedRoutes, allowedTo("admin"), deleteOrder);
+router.delete(
+  "/:orderId",
+  protectedRoutes,
+  allowedTo("admin", "manager"),
+  deleteOrder
+);
 
 export default router;

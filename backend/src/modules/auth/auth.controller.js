@@ -103,6 +103,7 @@ const loginEmployee = asyncHandler(async (req, res, next) => {
   res.json(new ApiResponse(200, { accessToken }, "Login successful"));
 });
 
+
 const protectedRoutes = asyncHandler(async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -118,7 +119,20 @@ const protectedRoutes = asyncHandler(async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await UserModel.findById(decoded.id);
+
+    let user;
+    if (decoded.role === "customer") {
+      user = await UserModel.findById(decoded.id);
+    } else if (
+      ["admin", "manager", "chef", "waiter", "cashier", "delivery"].includes(
+        decoded.role
+      )
+    ) {
+      user = await EmployeeModel.findById(decoded.id);
+    } else {
+      return next(new AppError(401, "Invalid role in token!"));
+    }
+
     if (!user) {
       return next(new AppError(404, "User not found!"));
     }
@@ -127,6 +141,7 @@ const protectedRoutes = asyncHandler(async (req, res, next) => {
 
     next();
   } catch (err) {
+    // Handle token verification errors
     if (err.name === "JsonWebTokenError") {
       return next(new AppError(401, "Invalid token!"));
     } else if (err.name === "TokenExpiredError") {
@@ -139,19 +154,24 @@ const protectedRoutes = asyncHandler(async (req, res, next) => {
   }
 });
 
+
 const allowedTo = (...roles) => {
   return asyncHandler(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError(
-          401,
-          `You are not authorized to access this route. Your role is ${req.user.role}`
+          403,
+          `Access denied. You do not have permission to perform this action. Required roles: ${roles.join(
+            ", "
+          )}. Your role: ${req.user.role}`
         )
       );
     }
+    
     next();
   });
 };
+
 
 const refreshTokenHandler = asyncHandler(async (req, res, next) => {
   const { refreshToken } = req.body;

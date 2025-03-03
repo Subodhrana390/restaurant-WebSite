@@ -36,7 +36,7 @@ const AdminLayout = ({ children }) => {
         </button>
 
         {/* Content Container with Glass Effect */}
-        <div className="rounded-lg backdrop-blur-md bg-white/10 border border-white/20 shadow-xl p-6 min-h-[calc(100vh-120px)]">
+        <div className="rounded-lg backdrop-blur-md bg-white/10 border border-white/20 shadow-xl p-1 min-h-[calc(100vh-120px)]">
           {children || <Outlet />}
         </div>
       </main>

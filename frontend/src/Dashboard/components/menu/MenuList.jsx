@@ -12,6 +12,7 @@ const MenuList = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [menuToDelete, setMenuToDelete] = useState(null);
   const observer = useRef();
+  const accessToken = localStorage.getItem("token");
 
   const fetchMenus = useCallback(async () => {
     if (!hasMore) return;
@@ -20,6 +21,10 @@ const MenuList = () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_APP_BASE_URL}/menu`, {
         params: { cursor, limit: 10 },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
       const { menuItems, hasMore: newHasMore } = res.data.data;
@@ -28,7 +33,6 @@ const MenuList = () => {
       setCursor(menuItems.length ? menuItems[menuItems.length - 1]._id : null);
       setHasMore(newHasMore);
     } catch (err) {
-      toast.error("Failed to fetch menu items. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -65,12 +69,18 @@ const MenuList = () => {
 
     try {
       await axios.delete(
-        `${import.meta.env.VITE_APP_BASE_URL}/menu/${menuToDelete._id}`
+        `${import.meta.env.VITE_APP_BASE_URL}/menu/${menuToDelete._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
       );
       setMenus(menus.filter((menu) => menu._id !== menuToDelete._id));
       toast.success("Menu item deleted successfully!");
     } catch (err) {
-      toast.error("Failed to delete the menu item. Please try again.");
+      toast.error("Access denied. Admins only.");
     } finally {
       setShowDeleteModal(false);
       setMenuToDelete(null);
