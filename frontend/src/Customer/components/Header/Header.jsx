@@ -175,9 +175,9 @@ const Header = () => {
                 key={item}
                 className="text-gray-700 hover:text-orange-500 transition"
               >
-                <a href={`${item.toLowerCase()}`} onClick={toggleMenu}>
-                  {item}
-                </a>
+               <a href={`/${item === "Home" ? "/" : item.toLowerCase()}`}>
+                {item}
+              </a>
               </li>
             ))}
             {/* Add My Orders and My Reservations if user is logged in */}
