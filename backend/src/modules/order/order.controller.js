@@ -237,7 +237,6 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
   if (!order) throw new AppError(404, "Order not found");
 
   if (order.paymentStatus === "paid" && order.paymentMethod === "online") {
-    // Initiate refund in Razorpay
     await razorpayInstance.payments.refund(order.paymentId);
     order.paymentStatus = "refunded";
   }

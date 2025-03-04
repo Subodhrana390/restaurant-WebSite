@@ -186,6 +186,10 @@ const OrderList = () => {
                     <select
                       name="status"
                       value={order.status}
+                      disabled={
+                        order.status == "cancelled" ||
+                        order.status == "delivered"
+                      }
                       onChange={(e) => {
                         let status = e.target.value;
                         updateOrderStatus({ order, status });

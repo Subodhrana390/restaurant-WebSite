@@ -30,26 +30,26 @@ const OrderDetails = () => {
   const [error, setError] = useState(null);
   const { accessToken } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_APP_BASE_URL}/orders/${orderId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        setOrder(response.data.order);
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-        setError("Failed to load order details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchOrderDetails = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_APP_BASE_URL}/orders/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      setOrder(response.data.order);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      setError("Failed to load order details. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchOrderDetails();
   }, [orderId, accessToken]);
 
@@ -181,6 +181,26 @@ const OrderDetails = () => {
 
   // Get address details if available
   const addressDetails = getAddressDetails(order.address);
+
+  const cancelOrder = async () => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_APP_BASE_URL}/orders/${orderId}/cancel`,
+        {}, // Empty object as the request body (if no data is needed)
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      fetchOrderDetails();
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      setError("Failed to cancel the order. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -373,7 +393,7 @@ const OrderDetails = () => {
                     <div key={index} className="grid grid-cols-4 text-sm">
                       <span>{item.menuId.name}</span>
                       <span className="text-center">{item.quantity}</span>
-                      <span className="text-right">₹{item.price}</span>
+                      <span className="text-right">₹ {item.price}</span>
                       <span className="text-right">
                         ₹ {item.quantity * item.price}
                       </span>
@@ -391,6 +411,17 @@ const OrderDetails = () => {
                 <span className="text-xl">₹{order.totalPrice}</span>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-1 text-right">
+            {order.status === "delivered" && (
+              <button
+                className="bg-orange-500 py-2 px-2 rounded-lg font-bold text-white"
+                onClick={cancelOrder}
+              >
+                Cancel Order
+              </button>
+            )}
           </div>
         </div>
       </div>
