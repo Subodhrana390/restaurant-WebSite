@@ -24,7 +24,8 @@
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.1",
     "redux-persist": "^6.0.0",
-    "slick-carousel": "^1.8.1"
+    "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

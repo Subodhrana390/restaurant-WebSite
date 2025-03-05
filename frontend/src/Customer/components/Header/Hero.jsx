@@ -42,7 +42,7 @@ const Hero = () => {
       />
 
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent z-0"></div>
+      {/* <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent"></div> */}
     </div>
   );
 };

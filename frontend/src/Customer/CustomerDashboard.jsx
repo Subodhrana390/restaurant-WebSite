@@ -19,6 +19,7 @@ import MenuDetails from "./components/Menu/MenuDetails";
 import OrderStatus from "./components/cart/OrderStatus";
 import MyReservation from "./components/Reservation/MyReservation";
 import { setCart } from "../redux/cartSlice";
+import Notifications from "./components/notification/Notifications";
 
 const CustomerDashboard = () => {
   const { user, accessToken } = useSelector((state) => state.auth);
@@ -77,6 +78,7 @@ const CustomerDashboard = () => {
         {/* Protected Routes */}
         <Route element={<ProtectedRoutes />}>
           <Route path="booktable" element={<BookTable />} />
+          <Route path="cart" element={<Cart />} />
           <Route path="cart" element={<Cart />} />
           <Route path="/order-status/:orderId" element={<OrderStatus />} />
           <Route path="my-orders" element={<MyOrder />} />

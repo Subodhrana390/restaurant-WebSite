@@ -6,10 +6,11 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import { razorpayInstance } from "../../../config/razorpay.js"; // Ensure this exists and is configured
 import { MenuModel } from "../../../Database/models/menu.model.js";
 import { CartModel } from "../../../Database/models/cart.model.js";
-import mongoose from "mongoose";
+import { createNotification } from "../notification/notification.controller.js";
+import axios from "axios";
 
 const createCashOrder = asyncHandler(async (req, res) => {
-  const cart = await cartModel.findById(req.params.id);
+  const cart = await CartModel.findById(req.params.id);
   if (!cart) throw new AppError("Cart not found", 404);
 
   const { address, phone, city } = req.body.shippingAddress;
@@ -93,7 +94,6 @@ const createOrder = asyncHandler(async (req, res, next) => {
     totalPrice,
   } = req.body;
 
-  // Create order instance
   const newOrder = new OrderModel({
     customer: req.user._id,
     menuItems: menuItem,
@@ -115,6 +115,19 @@ const createOrder = asyncHandler(async (req, res, next) => {
       receipt: savedOrder._id.toString(),
     };
     const razorpayOrder = await razorpayInstance.orders.create(options);
+
+    const newNotification = await createNotification({
+      recipientId: order.customer,
+      type: "orders",
+      content: order.status,
+      orderId: order._id,
+    });
+
+    await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+      userId: order.customer,
+      data: newNotification,
+    });
+
     return res
       .status(201)
       .json(
@@ -204,12 +217,25 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
   const { orderId } = req.params;
   const { status } = req.body;
 
+  // Find the order
   const order = await OrderModel.findById(orderId);
   if (!order) throw new AppError(404, "Order not found");
 
+  // Update order status
   order.status = status;
   await order.save();
 
+  const newNotification = await createNotification({
+    recipientId: order.customer,
+    type: "orders",
+    content: status,
+    orderId: order._id,
+  });
+
+  await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+    userId: order.customer,
+    data: newNotification,
+  });
   res
     .status(200)
     .json(new ApiResponse(200, order, "Order status updated successfully"));
@@ -243,6 +269,18 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
 
   order.status = "cancelled";
   await order.save();
+
+  const newNotification = await createNotification({
+    recipientId: order.customer,
+    type: "orders",
+    content: order.status,
+    orderId: order._id,
+  });
+
+  await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+    userId: order.customer,
+    data: newNotification,
+  });
 
   res
     .status(200)

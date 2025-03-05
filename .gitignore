@@ -1,4 +1,5 @@
 backend/node_modules
 frontend/node_modules
+Web_socket_backend/node_modules
 frontend/.env
 backend/.env
