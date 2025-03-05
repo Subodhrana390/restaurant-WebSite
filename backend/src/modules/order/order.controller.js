@@ -117,14 +117,14 @@ const createOrder = asyncHandler(async (req, res, next) => {
     const razorpayOrder = await razorpayInstance.orders.create(options);
 
     const newNotification = await createNotification({
-      recipientId: order.customer,
+      recipientId: newOrder.customer,
       type: "orders",
-      content: order.status,
-      orderId: order._id,
+      content: newOrder.status,
+      orderId: newOrder._id,
     });
 
-    await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
-      userId: order.customer,
+    await axios.post(`${process.env.WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+      userId: newOrder.customer,
       data: newNotification,
     });
 
@@ -232,7 +232,7 @@ const updateOrderStatus = asyncHandler(async (req, res, next) => {
     orderId: order._id,
   });
 
-  await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+  await axios.post(`${process.env.WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
     userId: order.customer,
     data: newNotification,
   });
@@ -277,7 +277,7 @@ const cancelOrder = asyncHandler(async (req, res, next) => {
     orderId: order._id,
   });
 
-  await axios.post(`${WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
+  await axios.post(`${process.env.WEBSOCKET_BASE_URL}/sendOrderUpdate`, {
     userId: order.customer,
     data: newNotification,
   });
